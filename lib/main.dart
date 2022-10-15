@@ -52,10 +52,21 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedPageIndex = 0;
+  bool isBottomSheetOpen = false;
 
   void selectPage(int index) {
+    if (isBottomSheetOpen) {
+      Navigator.of(context).pop();
+    }
     setState(() {
       selectedPageIndex = index;
+      isBottomSheetOpen = false;
+    });
+  }
+
+  void openBottomSheet(bool isOpen) {
+    setState(() {
+      isBottomSheetOpen = isOpen;
     });
   }
 
@@ -73,7 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: selectedPageIndex == Pages.map.index ? MapPage() : Column(),
+      body: selectedPageIndex == Pages.map.index
+          ? MapPage(openBottomSheet)
+          : Column(),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
@@ -81,6 +94,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         currentIndex: selectedPageIndex,
         onTap: selectPage,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // TODO: implement creating fountain
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
