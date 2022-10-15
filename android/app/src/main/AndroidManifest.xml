@@ -1,9 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.big_red_hacks_2022">
-   <application
+    <application
         android:label="big_red_hacks_2022"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+       <meta-data android:name="com.google.android.geo.API_KEY"
+           android:value="AIzaSyAORTWP4-O-C6oa1uS7-no_YTeSQKW3P64"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
