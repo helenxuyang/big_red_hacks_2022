@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Fountain {
   Building building;
   String locationDescription;
   bool isFunctional;
+  GeoPoint location;
   List<Review> reviews;
-  Fountain(
-      this.building, this.locationDescription, this.isFunctional, this.reviews);
+  Fountain(this.building, this.locationDescription, this.isFunctional,
+      this.location, this.reviews);
 }
 
 class Building {
@@ -16,7 +19,7 @@ class Building {
 
 class Review {
   String author;
-  double rating;
+  int rating;
   String? review;
   Review(this.author, this.rating, this.review);
 }
