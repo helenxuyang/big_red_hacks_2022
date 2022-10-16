@@ -192,6 +192,10 @@ class _MapPageState extends State<MapPage> {
                             OutlinedButton(
                               onPressed: () {
                                 // TODO: implement fountain functional/broken
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Thanks for reporting the status of this fountain!')));
                               },
                               child: Row(
                                 children: [
