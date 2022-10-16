@@ -1,8 +1,13 @@
+import 'package:big_red_hacks_2022/reviews.dart';
+import 'package:big_red_hacks_2022/widget_utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:provider/provider.dart';
 
 import 'fountain.dart';
+import 'login.dart';
 
 class MapPage extends StatefulWidget {
   MapPage(this.openBottomSheet);
@@ -67,27 +72,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Widget createStars(double rating) {
-    List<Widget> stars = [];
-    int fullStars = rating.toInt();
-    bool hasHalfStar = rating % 1 > 0;
-    const double size = 16;
-    for (int i = 0; i < fullStars; i++) {
-      stars.add(const Icon(Icons.star, size: size));
-    }
-    if (hasHalfStar) {
-      stars.add(const Icon(Icons.star_half, size: size));
-      for (int i = 0; i < 5 - fullStars - 1; i++) {
-        stars.add(const Icon(Icons.star_border, size: size));
-      }
-    } else {
-      for (int i = 0; i < 5 - fullStars; i++) {
-        stars.add(const Icon(Icons.star_border, size: size));
-      }
-    }
-    return Row(children: stars);
-  }
-
   Marker createMarker(Fountain fountain) {
     Building building = fountain.building;
     MarkerId tempId =
@@ -137,7 +121,7 @@ class _MapPageState extends State<MapPage> {
                             children: [
                               const Text('0.1 miles'), // TODO use real distance
                               dividerDot,
-                              createStars(4.5),
+                              buildStars(4.5),
                               const Text('(12)'), // TODO implement reviews
                               dividerDot,
                               Wrap(
@@ -177,7 +161,17 @@ class _MapPageState extends State<MapPage> {
                           Row(children: [
                             OutlinedButton(
                               onPressed: () {
-                                // TODO: implement leaving reviews
+                                User? user = Provider.of<CurrentUserInfo>(
+                                        context,
+                                        listen: false)
+                                    .user;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ReviewsPage(fountain, user),
+                                  ),
+                                );
                               },
                               child: Row(
                                 children: const [
@@ -238,15 +232,38 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> createFountainMarkers() async {
+    // TODO: actually get fountains
     List<Fountain> fountains = [
       Fountain(
-        Building('Schwartz Center', 42.4424, -76.4860),
+        'tempid2',
+        Building('tempid', 'Schwartz Center', 42.4424, -76.4860),
         'Lobby near elevator (floor 1)',
         true,
-        [],
+        [
+          Review(
+              Provider.of<CurrentUserInfo>(context, listen: false).user?.uid ??
+                  'temp',
+              'Helen',
+              'https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x2.jpg',
+              5,
+              'hell yeah good water'),
+          Review(
+              'tempid2',
+              'Ahmed',
+              'https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x2.jpg',
+              5,
+              'hell yeah good water'),
+          Review(
+              'tempid3',
+              'Taha',
+              'https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x2.jpg',
+              1,
+              'hell no bad water')
+        ],
       ),
       Fountain(
-        Building('Really Long Building Name', 42.4445, -76.4823),
+        'tempid3',
+        Building('long', 'Really Long Building Name', 42.4445, -76.4823),
         'Lobby near elevator (floor 1)',
         true,
         [],
