@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 class CurrentUserInfo with ChangeNotifier {
   late String? id;
+  late User? user;
 
   void setID(String? id) {
     this.id = id;
@@ -16,7 +17,6 @@ class CurrentUserInfo with ChangeNotifier {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Future<User?> _handleSignIn() async {
-    User? user;
     bool isSignedIn = await _googleSignIn.isSignedIn();
 
     if (isSignedIn) {
@@ -54,7 +54,8 @@ class LoginPage extends StatelessWidget {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Thirsty 🥵", style: Theme.of(context).textTheme.headline1),
+            Text("Thirsty 🥵", style: TextStyle(fontSize: 32)),
+            SizedBox(height: 8),
             SignInButton(),
             SignOutButton()
           ],
@@ -72,7 +73,7 @@ class SignInButton extends StatelessWidget {
       child: OutlineButton(
         highlightColor: Colors.white,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(16.0),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             Image.asset('assets/google_logo.png', width: 20),
             SizedBox(width: 20),
