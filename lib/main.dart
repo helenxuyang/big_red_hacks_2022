@@ -1,8 +1,12 @@
+import 'package:big_red_hacks_2022/firebase_helpers.dart';
 import 'package:big_red_hacks_2022/map_page.dart';
+import 'package:big_red_hacks_2022/utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'fountain.dart';
+import 'list_page.dart';
 import 'login.dart';
 
 void main() async {
@@ -87,29 +91,43 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: selectedPageIndex == Pages.map.index
-          ? MapPage(openBottomSheet)
-          : Column(),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
-        ],
-        currentIndex: selectedPageIndex,
-        onTap: selectPage,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: implement creating fountain
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
+    return FutureBuilder<List<Fountain>>(
+        future: Helpers.getAllFountains(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print('get all fountains error ' + snapshot.error.toString());
+          }
+          if (!snapshot.hasData) {
+            print('get all fountains no data');
+            return Center(child: CircularProgressIndicator());
+          }
+          List<Fountain>? fountains = snapshot.data;
+          fountains!.sort((a, b) =>
+              (getAvgRating(b.reviews) - getAvgRating(a.reviews)).toInt());
+          return Scaffold(
+            appBar: AppBar(
+                // Here we take the value from the MyHomePage object that was created by
+                // the App.build method, and use it to set our appbar title.
+                title: Text(widget.title),
+                automaticallyImplyLeading: false),
+            body: selectedPageIndex == Pages.map.index
+                ? MapPage(fountains, openBottomSheet)
+                : ListPage(fountains),
+            bottomNavigationBar: BottomNavigationBar(
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
+                BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
+              ],
+              currentIndex: selectedPageIndex,
+              onTap: selectPage,
+            ),
+            // floatingActionButton: FloatingActionButton(
+            //   onPressed: () {
+            //     // TODO: implement creating fountain
+            //   },
+            //   child: const Icon(Icons.add),
+            // ),
+          );
+        });
   }
 }

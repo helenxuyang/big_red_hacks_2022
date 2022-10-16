@@ -53,9 +53,9 @@ class LoginPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("Thirsty 🥵", style: TextStyle(fontSize: 32)),
-            SizedBox(height: 8),
+            SizedBox(height: 16),
             SignInButton(),
-            SignOutButton()
+            // SignOutButton()
           ],
         ),
       ),

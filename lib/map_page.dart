@@ -1,5 +1,4 @@
 import 'package:big_red_hacks_2022/reviews.dart';
-import 'package:big_red_hacks_2022/widget_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -8,10 +7,12 @@ import 'package:provider/provider.dart';
 
 import 'firebase_helpers.dart';
 import 'fountain.dart';
+import 'fountain_info.dart';
 import 'login.dart';
 
 class MapPage extends StatefulWidget {
-  MapPage(this.openBottomSheet);
+  MapPage(this.fountains, this.openBottomSheet);
+  final List<Fountain> fountains;
   final Function(bool) openBottomSheet;
   final double defaultLat = 42.449707; // PSB
   final double defaultLong = -76.4838893; // PSB
@@ -19,18 +20,16 @@ class MapPage extends StatefulWidget {
   State<StatefulWidget> createState() => _MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class _MapPageState extends State<MapPage> with WidgetsBindingObserver {
   late GoogleMapController mapController;
   Location location = Location();
   LatLng? currentLoc;
-  Set<Marker> fountainMarkers = {};
   Fountain? selectedFountain;
 
   @override
   void initState() {
     super.initState();
     setCurrentLocation();
-    createFountainMarkers();
   }
 
   Future<bool> locationPermissionsGranted() async {
@@ -73,16 +72,103 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  Widget buildBottomSheet(Fountain fountain) {
+    return Helpers.ratingsStreamBuilder(fountain.fid, (context, reviews) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height / 3,
+        width: MediaQuery.of(context).size.width,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: Container(color: Colors.grey, width: 50, height: 2),
+              ),
+              const SizedBox(height: 24),
+              FountainInfo(fountain, reviews, currentLoc),
+              const SizedBox(height: 16),
+              Row(children: [
+                OutlinedButton(
+                  onPressed: () {
+                    User? user =
+                        Provider.of<CurrentUserInfo>(context, listen: false)
+                            .user;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReviewsPage(fountain, user),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: const [
+                      Icon(Icons.reviews, size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        'Reviews',
+                        style: TextStyle(color: Colors.blueAccent),
+                      )
+                    ],
+                  ),
+                  style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blueAccent,
+                      side: const BorderSide(color: Colors.blueAccent)),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: () {
+                    // TODO: implement fountain functional/broken
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text(
+                            'Thanks for reporting the status of this fountain!')));
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(Icons.handyman, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Report ' +
+                            (fountain.isFunctional ? 'broken' : 'fixed'),
+                        style: const TextStyle(color: Colors.redAccent),
+                      )
+                    ],
+                  ),
+                  style: OutlinedButton.styleFrom(
+                      primary: Colors.redAccent,
+                      side: const BorderSide(color: Colors.redAccent)),
+                ),
+              ])
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  void showFountainInfo(Fountain fountain) {
+    widget.openBottomSheet(true);
+    Scaffold.of(context)
+        .showBottomSheet(
+          (context) {
+            return buildBottomSheet(fountain);
+          },
+          elevation: 8.0,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.0),
+              topRight: Radius.circular(16.0),
+            ),
+          ),
+        )
+        .closed
+        .whenComplete(() => widget.openBottomSheet(false));
+  }
+
   Marker createMarker(Fountain fountain) {
     MarkerId tempId = MarkerId(fountain.location.latitude.toString() +
         fountain.location.longitude.toString());
-    const dividerDot = Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.0),
-      child: Icon(
-        Icons.circle,
-        size: 2,
-      ),
-    );
     return Marker(
         markerId: tempId,
         position:
@@ -91,165 +177,19 @@ class _MapPageState extends State<MapPage> {
           setState(() {
             selectedFountain = fountain;
           });
-          widget.openBottomSheet(true);
-          Scaffold.of(context)
-              .showBottomSheet(
-                (context) {
-                  return SizedBox(
-                    height: MediaQuery.of(context).size.height / 3,
-                    width: MediaQuery.of(context).size.width,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                                color: Colors.grey, width: 50, height: 2),
-                          ),
-                          const SizedBox(height: 24),
-                          Flexible(
-                            child: Text(
-                              'Fountain in ' + fountain.buildingName,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              const Text('0.1 miles'), // TODO use real distance
-                              dividerDot,
-                              buildStars(4.5),
-                              const Text('(12)'), // TODO implement reviews
-                              dividerDot,
-                              Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: fountain.isFunctional
-                                    ? const [
-                                        Icon(Icons.check_circle_outline,
-                                            color: Colors.green, size: 16),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          'Functional',
-                                          style: TextStyle(
-                                            color: Colors.green,
-                                          ),
-                                        )
-                                      ]
-                                    : const [
-                                        Icon(Icons.cancel_outlined,
-                                            color: Colors.redAccent, size: 16),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          'Broken',
-                                          style: TextStyle(
-                                            color: Colors.redAccent,
-                                          ),
-                                        )
-                                      ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Location: ' + fountain.locationDescription,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(children: [
-                            OutlinedButton(
-                              onPressed: () {
-                                User? user = Provider.of<CurrentUserInfo>(
-                                        context,
-                                        listen: false)
-                                    .user;
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        ReviewsPage(fountain, user),
-                                  ),
-                                );
-                              },
-                              child: Row(
-                                children: const [
-                                  Icon(Icons.reviews, size: 16),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Reviews',
-                                    style: TextStyle(color: Colors.blueAccent),
-                                  )
-                                ],
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                  primary: Colors.blueAccent,
-                                  side: const BorderSide(
-                                      color: Colors.blueAccent)),
-                            ),
-                            const SizedBox(width: 8),
-                            OutlinedButton(
-                              onPressed: () {
-                                // TODO: implement fountain functional/broken
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Thanks for reporting the status of this fountain!')));
-                              },
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.handyman, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Report ' +
-                                        (fountain.isFunctional
-                                            ? 'broken'
-                                            : 'fixed'),
-                                    style: const TextStyle(
-                                        color: Colors.redAccent),
-                                  )
-                                ],
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                  primary: Colors.redAccent,
-                                  side: const BorderSide(
-                                      color: Colors.redAccent)),
-                            ),
-                          ])
-                        ],
-                      ),
-                    ),
-                  );
-                },
-                elevation: 8.0,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16.0),
-                    topRight: Radius.circular(16.0),
-                  ),
-                ),
-              )
-              .closed
-              .whenComplete(() => widget.openBottomSheet(false));
+          showFountainInfo(fountain);
         });
   }
 
-  Future<void> createFountainMarkers() async {
-    List<Fountain> fountains = await Helpers.getAllFountains();
-    print(fountains);
-    setState(() {
-      fountainMarkers = fountains.map((f) => createMarker(f)).toSet();
-    });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      mapController.setMapStyle("[]");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('google map build');
-    print(currentLoc);
-    print(fountainMarkers);
-
     if (currentLoc == null) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -261,9 +201,9 @@ class _MapPageState extends State<MapPage> {
       onMapCreated: onMapCreated,
       initialCameraPosition: CameraPosition(
         target: currentLoc!,
-        zoom: 15.0,
+        zoom: 17.0,
       ),
-      markers: fountainMarkers,
+      markers: widget.fountains.map((f) => createMarker(f)).toSet(),
     );
   }
 }
