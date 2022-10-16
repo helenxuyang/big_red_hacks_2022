@@ -57,7 +57,7 @@ class ReviewsPageState extends State<ReviewsPage> {
           children: [
             buildAuthorInfo(review.authorName, review.authorPhoto),
             const SizedBox(height: 8),
-            buildStars(review.rating),
+            buildStars(review.rating.toDouble()),
             const SizedBox(height: 8),
             Text(review.review ?? '')
           ],
@@ -141,7 +141,7 @@ class ReviewsPageState extends State<ReviewsPage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text('Fountain in ' + widget.fountain.building.name),
+        title: Text('Fountain in ' + widget.fountain.buildingName),
       ),
       body: SafeArea(
         child: ListView(

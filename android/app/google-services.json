@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "948708959495-n2oaiii21dsh78prl9uu6r8s6skq3dld.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.big_red_hacks_2022",
+            "certificate_hash": "743ea32cf3f956863cb99f267a3d9fc0c526a3fb"
+          }
+        },
+        {
           "client_id": "948708959495-3uq80s1jid50rcmkj73ppgefshvn4fpv.apps.googleusercontent.com",
           "client_type": 3
         }

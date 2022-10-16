@@ -32,11 +32,9 @@ class CurrentUserInfo with ChangeNotifier {
     return user;
   }
 
-  void signIn(BuildContext context) async {
+  Future<void> signIn(BuildContext context) async {
     User? user = await _handleSignIn();
     setID(user?.uid);
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Thirsty')));
   }
 
   Future<void> signOut() async {
@@ -70,8 +68,7 @@ class SignInButton extends StatelessWidget {
   Widget build(BuildContext context) {
     CurrentUserInfo userInfo = Provider.of<CurrentUserInfo>(context);
     return Center(
-      child: OutlineButton(
-        highlightColor: Colors.white,
+      child: OutlinedButton(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -80,8 +77,12 @@ class SignInButton extends StatelessWidget {
             Text('Sign in with Google', style: TextStyle(fontSize: 16))
           ]),
         ),
-        onPressed: () {
-          userInfo.signIn(context);
+        onPressed: () async {
+          await userInfo.signIn(context);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MyHomePage(title: 'Thirsty')));
         },
       ),
     );
@@ -92,7 +93,7 @@ class SignOutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     CurrentUserInfo userInfo = Provider.of<CurrentUserInfo>(context);
-    return RaisedButton(
+    return ElevatedButton(
       child: Text('Sign out'),
       onPressed: () {
         userInfo.signOut();

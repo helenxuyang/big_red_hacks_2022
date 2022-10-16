@@ -1,5 +1,6 @@
 // Collection names
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'fountain.dart';
 
 class Helpers {
@@ -10,8 +11,7 @@ class Helpers {
   static List<Review> _castReviewHelper(QuerySnapshot qShot) {
     return qShot.docs[0]
         .get('ratings')
-        .get()
-        .map((doc) => Review(doc.id, doc.get('authorName'),
+        .map<Review>((doc) => Review(doc.id, doc.get('authorName'),
             doc.get('authorPhoto'), doc.get('rating'), doc.get('review')))
         .toList();
   }
@@ -59,17 +59,15 @@ class Helpers {
   }
 
   static Future<List<Fountain>> getAllFountains() async {
+    print('get all fountains start');
     QuerySnapshot<Object> qShot =
         await FirebaseFirestore.instance.collection(fountains).get();
+    print('after qshot');
     List<Review> ratings = _castReviewHelper(qShot);
-    return qShot.docs
-        .map((doc) => Fountain(
-            doc.id,
-            doc.get('building'),
-            doc.get('description'),
-            doc.get('functional'),
-            doc.get('location'),
-            ratings))
-        .toList();
+    return qShot.docs.map<Fountain>((doc) {
+      print('fountain doc ' + doc.id);
+      return Fountain(doc.id, doc.get('building_name'), doc.get('description'),
+          doc.get('functional'), doc.get('location'), ratings);
+    }).toList();
   }
 }

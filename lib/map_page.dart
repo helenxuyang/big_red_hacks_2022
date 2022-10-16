@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
+import 'firebase_helpers.dart';
 import 'fountain.dart';
 import 'login.dart';
 
@@ -73,9 +74,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Marker createMarker(Fountain fountain) {
-    Building building = fountain.building;
-    MarkerId tempId =
-        MarkerId(building.longitude.toString() + building.latitude.toString());
+    MarkerId tempId = MarkerId(fountain.location.latitude.toString() +
+        fountain.location.longitude.toString());
     const dividerDot = Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.0),
       child: Icon(
@@ -85,7 +85,8 @@ class _MapPageState extends State<MapPage> {
     );
     return Marker(
         markerId: tempId,
-        position: LatLng(building.latitude, building.longitude),
+        position:
+            LatLng(fountain.location.latitude, fountain.location.longitude),
         onTap: () {
           setState(() {
             selectedFountain = fountain;
@@ -110,7 +111,7 @@ class _MapPageState extends State<MapPage> {
                           const SizedBox(height: 24),
                           Flexible(
                             child: Text(
-                              'Fountain in ' + fountain.building.name,
+                              'Fountain in ' + fountain.buildingName,
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -236,43 +237,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> createFountainMarkers() async {
-    // TODO: actually get fountains
-    List<Fountain> fountains = [
-      Fountain(
-        'tempid2',
-        Building('tempid', 'Schwartz Center', 42.4424, -76.4860),
-        'Lobby near elevator (floor 1)',
-        true,
-        [
-          Review(
-              Provider.of<CurrentUserInfo>(context, listen: false).user?.uid ??
-                  'temp',
-              'Helen',
-              'https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x2.jpg',
-              5,
-              'hell yeah good water'),
-          Review(
-              'tempid2',
-              'Ahmed',
-              'https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x2.jpg',
-              5,
-              'hell yeah good water'),
-          Review(
-              'tempid3',
-              'Taha',
-              'https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x2.jpg',
-              1,
-              'hell no bad water')
-        ],
-      ),
-      Fountain(
-        'tempid3',
-        Building('long', 'Really Long Building Name', 42.4445, -76.4823),
-        'Lobby near elevator (floor 1)',
-        true,
-        [],
-      )
-    ];
+    List<Fountain> fountains = await Helpers.getAllFountains();
+    print(fountains);
     setState(() {
       fountainMarkers = fountains.map((f) => createMarker(f)).toSet();
     });
