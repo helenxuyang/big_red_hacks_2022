@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "948708959495",
+    "project_id": "brh-2022-water-365614",
+    "storage_bucket": "brh-2022-water-365614.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948708959495:android:30398215b3f7c65afe11a2",
+        "android_client_info": {
+          "package_name": "com.example.big_red_hacks_2022"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "948708959495-bdidh3l08s02u1m25h3ropav2e22sv01.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.big_red_hacks_2022",
+            "certificate_hash": "a6591869b21fc9951a67480ffe60587e7e99b274"
+          }
+        },
+        {
+          "client_id": "948708959495-3uq80s1jid50rcmkj73ppgefshvn4fpv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAORTWP4-O-C6oa1uS7-no_YTeSQKW3P64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "948708959495-3uq80s1jid50rcmkj73ppgefshvn4fpv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
