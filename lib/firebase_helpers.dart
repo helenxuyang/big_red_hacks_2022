@@ -12,15 +12,15 @@ class Helpers {
         .get('ratings')
         .get()
         .map((doc) => Review(doc.id, doc.get('authorName'),
-            doc.get('authorPhoto'), doc.get('score'), doc.get('text')))
+            doc.get('authorPhoto'), doc.get('rating'), doc.get('review')))
         .toList();
   }
 
   static Future<void> submitReview(String fountainId, String reviewId,
       String author, String authorPhotoUrl, int rating, String? review) async {
     FirebaseFirestore.instance.collection(fountains).doc(fountainId).set({
-      "author": author,
-      "authorPhotoUrl": authorPhotoUrl,
+      "authorName": author,
+      "authorPhoto": authorPhotoUrl,
       "rating": rating,
       "review": review
     });
